@@ -93,8 +93,14 @@ module Fog
           raise "Template #{template_string} does not exist" if template.allowed_operations.nil?
           raise 'Clone Operation not Allowed' unless template.allowed_operations.include?('clone')
 
-          # Clone the VM template
-          ref = clone_server name_label, template.reference
+          if( !extra_args[:sr_ref] )
+            # Clone the VM template
+            ref = clone_server name_label, template.reference
+          else
+            # Copy the VM template into SR
+            ref = copy_server name_label, template.reference, extra_args[:sr_ref]            
+          end
+          
           # Add additional NICs
           networks.each do |n|
             create_vif ref, n.reference

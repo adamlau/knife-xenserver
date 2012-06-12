@@ -17,7 +17,26 @@ module Fog
           )
         end
 
+      def copy_server( server_name, template_ref, sr_ref )
+        # Copy the VM template
+        if template_ref.kind_of? Fog::Compute::XenServer::Server
+          template_ref = template_ref.reference
+        end
+        raise ArgumentError.new("Invalid template_ref") if template_ref.nil?
+        raise ArgumentError.new("Invalid server_name") if server_name.nil?
+
+        if sr_ref.kind_of? Fog::Compute::XenServer::StorageRepository
+          sr_ref = sr_ref.reference
+        end
+        raise ArgumentError.new("Invalid sr_ref") if sr_ref.nil?
+
+        ref = @connection.request(
+          {:parser => Fog::Parsers::XenServer::Base.new, :method => 'VM.copy'},
+          template_ref, server_name, sr_ref 
+        )        
       end
+
+    end
 
       class Mock
 

@@ -30,6 +30,7 @@ class Chef
         require 'alchemist'
         require 'chef/json_compat'
         require 'chef/knife/bootstrap'
+        require 'cgi'
         Chef::Knife::Bootstrap.load_deps
       end
 
@@ -216,9 +217,24 @@ class Chef
         puts "Creating VM #{config[:vm_name].yellow}..."
         puts "Using template #{template.name.yellow} [uuid: #{template.uuid}]..."
         
+#        vm = connection.servers.new :name => config[:vm_name],
+#                                    :template_name => config[:vm_template]
+
+        sr = connection.storage_repositories.find { |sr| sr.name == 'XS-VM-Group20' }
         vm = connection.servers.new :name => config[:vm_name],
-                                    :template_name => config[:vm_template]
-        vm.save :auto_start => false
+                                    :template_name => config[:vm_template]                                                                                   
+        vm.save :auto_start => false, :sr_ref => sr
+
+#        vm.set_attribute 'name_description', template.name_description                                     
+#        vm.set_attribute 'suspend_SR', sr.reference
+        #rewrite the disks xml now
+#        disksXml = vm.other_config["disks"]
+#        puts "diskXml: #{disksXml}"
+#        connection.remove_attribute_from 'VM', vm.reference, 'other_config', 'disks'
+#        newDiskXml = CGI.escapeHTML(disksXml.gsub( %r{sr='[^'.]+'}, "sr='#{newSR}'"))
+#        puts "newDiskXml: #{newDiskXml}"
+#        connection.add_attribute_to 'VM', vm.reference, 'other_config', 'disks', newDiskXml
+        
         if not config[:keep_template_networks]
           vm.vifs.each do |vif|
             vif.destroy
@@ -238,17 +254,18 @@ class Chef
         vm.add_attribute('to_xenstore_data', 'vm-data/gw', config[:vm_gateway]) if config[:vm_gateway]
         vm.add_attribute('to_xenstore_data', 'vm-data/nm', config[:vm_netmask]) if config[:vm_netmask]
         vm.add_attribute('to_xenstore_data', 'vm-data/ns', config[:vm_dns]) if config[:vm_dns]
-	vm.add_attribute('to_xenstore_data', 'vm-data/dm', config[:vm_domain]) if config[:vm_domain]
+        vm.add_attribute('to_xenstore_data', 'vm-data/dm', config[:vm_domain]) if config[:vm_domain]
 
         if config[:vm_tags]
           vm.set_attribute 'tags', config[:vm_tags].split(',')
         end
+                  
         vm.provision
         vm.start
         vm.reload
 
         puts "#{ui.color("VM Name", :cyan)}: #{vm.name}"
-        puts "#{ui.color("VM Memory", :cyan)}: #{vm.memory_static_max.to_i.bytes.to.megabytes.round} MB"
+#        puts "#{ui.color("VM Memory", :cyan)}: #{vm.memory_static_max.to_i.B.to.MB.round} MB"
 
         if !config[:skip_bootstrap]
           # wait for it to be ready to do stuff

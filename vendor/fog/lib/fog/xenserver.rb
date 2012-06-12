@@ -13,7 +13,7 @@ module Fog
       require 'xmlrpc/client'
     
       def initialize(host)
-        @factory = XMLRPC::Client.new(host, '/')
+      @factory = XMLRPC::Client.new3({'host' => host, 'path' => '/', 'timeout' => 180})
         @factory.set_parser(XMLRPC::XMLParser::REXMLStreamParser.new)
       end
     
@@ -36,6 +36,7 @@ module Fog
             elsif params.length.eql?(2) and params.last.is_a?(Array)
               response = @factory.call(method, @credentials, params.first, params.last)
             else
+              puts "@factory.call('#{method}', '#{@credentials}', #{params.map {|p|  p.is_a?(String) ? "'#{p}'" : p}.join(',')})"
               response = eval("@factory.call('#{method}', '#{@credentials}', #{params.map {|p|  p.is_a?(String) ? "'#{p}'" : p}.join(',')})")
             end
           end

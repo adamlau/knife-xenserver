@@ -92,7 +92,15 @@ module Fog
           # then reload manually
           #reload
         end
-        
+
+        def add_attribute_to(name, key, *val)
+          data = connection.add_attribute_to( 'VM', reference, name, key, *val )
+          # Do not reload automatically for performance reasons
+          # We can set multiple attributes at the same time and
+          # then reload manually
+          #reload
+        end
+    
         def refresh
           data = connection.get_record( reference, 'VM' )
           merge_attributes( data )
@@ -158,9 +166,12 @@ module Fog
           else
             auto_start = params[:auto_start] 
           end
+
+          sr_ref ||= params[:sr_ref]
+            
           if template_name
             attr = connection.get_record(
-              connection.create_server( name, template_name, nets, :auto_start => auto_start),
+              connection.create_server( name, template_name, nets, :auto_start => auto_start, :sr_ref => sr_ref ),
               'VM'
             )
           else
