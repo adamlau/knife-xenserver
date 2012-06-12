@@ -30,7 +30,6 @@ class Chef
         require 'alchemist'
         require 'chef/json_compat'
         require 'chef/knife/bootstrap'
-        require 'cgi'
         Chef::Knife::Bootstrap.load_deps
       end
 
@@ -161,6 +160,11 @@ class Chef
         :long => '--vm-domain DOMAIN',
         :description => 'DOMAIN of host to set in xenstore'
 
+      option :vm_sr,
+        :long => '--vm-sr SR_LABEL',
+        :description => 'Label of the storage repository to install into',
+        :default => nil
+
       def tcp_test_ssh(hostname)
         tcp_socket = TCPSocket.new(hostname, 22)
         readable = IO.select([tcp_socket], nil, nil, 5)
@@ -220,9 +224,10 @@ class Chef
 #        vm = connection.servers.new :name => config[:vm_name],
 #                                    :template_name => config[:vm_template]
 
-        sr = connection.storage_repositories.find { |sr| sr.name == 'XS-VM-Group20' }
         vm = connection.servers.new :name => config[:vm_name],
                                     :template_name => config[:vm_template]                                                                                   
+
+        sr = connection.storage_repositories.find { |sr| sr.name == config[:vm_sr] } if config[:vm_sr]
         vm.save :auto_start => false, :sr_ref => sr
 
 #        vm.set_attribute 'name_description', template.name_description                                     
