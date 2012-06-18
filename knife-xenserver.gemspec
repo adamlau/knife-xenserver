@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   ## Fog 1.3.1 deps. We'll need to remove them
   # when using fog upstream
   s.add_dependency('builder')
-  s.add_dependency('excon', '~>0.13.0')
+  s.add_dependency('excon', '~>0.14.0')
   s.add_dependency('formatador', '~>0.2.0')
   s.add_dependency('multi_json', '~>1.0')
   s.add_dependency('mime-types')
@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency('nokogiri', '~>1.5.0')
   s.add_dependency('colored')
   s.add_dependency('ruby-hmac')
-  s.add_dependency('alchemist')
+  s.add_dependency('alchemist', '~> 0.1.2.1')
   s.add_dependency('uuidtools')
   s.require_paths = ["lib"]
 end
